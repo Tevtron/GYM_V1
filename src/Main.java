@@ -1,7 +1,7 @@
 import java.util.*;
 import java.time.LocalDate;
 
-
+/* teständerung um zu schauen ob der scheiß geht */
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
     private static final FitnessStudio studio = new FitnessStudio("GYM Cleverfit Siegen", "Freudenberger Str. 488, 57072 Siegen");
