@@ -1,13 +1,13 @@
 import java.util.*;
-import java.time.LocalDate;
+import java.time.*;
 
-/* teständerung um zu schauen ob der scheiß geht */
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
     private static final FitnessStudio studio = new FitnessStudio("GYM Cleverfit Siegen", "Freudenberger Str. 488, 57072 Siegen");
 
     public static void main(String[] args) {
         boolean running = true;
+
 
         while (running) {
             System.out.println("\n ");
@@ -21,7 +21,8 @@ public class Main {
             System.out.println("5. Trainer anzeigen");
             System.out.println("6. Kurs erstellen");
             System.out.println("7. Kurse anzeigen");
-            System.out.println("8. Impressum/Infortmationen");
+            System.out.println("8. Impressum/Informationen");
+            System.out.println("9. Mitglied suchen / sortieren");
             System.out.println("0. Beenden");
             System.out.print("Wähle eine Option: ");
 
@@ -36,34 +37,21 @@ public class Main {
                 case 5 -> studio.trainerAnzeigen();
                 case 6 -> kursErstellen();
                 case 7 -> studio.kurseAnzeigen();
-                case 8 -> {
-                    System.out.println("\nGYM Cleverfit Siegen");
-                    System.out.println("Inhaber: Sergej Wagner, Michael Wagner");
-                    System.out.println("\nStraße: Freudenberger Str. 488");
-                    System.out.println("Stadt: 57072 Siegen");
-                    System.out.println("\nÖffnungszeiten:");
-                    String ergebnis = OeffnungszeitenCheck.pruefeOeffnungszeiten();
-                    System.out.println(" " + ergebnis);
-                    System.out.println("Montag - Freitag: 07:00Uhr - 23:00Uhr");
-                    System.out.println("Samstag - Sonntag: 09:00Uhr - 20:00Uhr");
-                    System.out.println("Feiertags: 09:00Uhr - 16:00Uhr");
-                    System.out.println("\nEmail: studio@siegen.clever-fit.com");
-                    System.out.println("TEL: +49 (0) 27180918578");
-                }
+                case 8 -> impressumAnzeigen();
+                case 9 -> mitgliedSuchmenue();
                 case 0 -> {
                     running = false;
                     System.out.println("Programm beendet.");
                 }
-                default -> System.out.println("Ungültig! Bitte erneut auswählen.");
+                default -> System.out.println("Ungültige Eingabe. Bitte erneut versuchen.");
             }
         }
     }
 
-
     private static void mitgliedErstellen() {
         System.out.print("Name des Mitglieds: ");
         String name = scanner.nextLine();
-        System.out.print("Geburtsdatum (Tag-Monat-Jahr): ");
+        System.out.print("Geburtsdatum (TT-MM-JJJJ): ");
         String geburtsdatum = scanner.nextLine();
         studio.mitgliedAnmelden(name, geburtsdatum);
     }
@@ -71,7 +59,7 @@ public class Main {
     private static void trainerErstellen() {
         System.out.print("Name des Trainers: ");
         String name = scanner.nextLine();
-        System.out.print("Spezialisierungen (Oberkörper, Unterkörper ; Mann, Frau, Divers): ");
+        System.out.print("Spezialisierungen (z.B. Kraft, Cardio, Yoga): ");
         List<String> spezialisierungen = Arrays.asList(scanner.nextLine().split(","));
         studio.trainerEintragen(name, spezialisierungen);
     }
@@ -81,9 +69,9 @@ public class Main {
         String name = scanner.nextLine();
         System.out.print("Leiter des Kurses: ");
         String leiter = scanner.nextLine();
-        System.out.print("Zeit (XX:XX): ");
+        System.out.print("Zeit (z.B. 18:00): ");
         String zeit = scanner.nextLine();
-        System.out.print("Maximale Teilnehmeranzahl: ");
+        System.out.print("Maximale Teilnehmerzahl: ");
         int maxTeilnehmer = scanner.nextInt();
         scanner.nextLine();
 
@@ -103,16 +91,216 @@ public class Main {
 
         studio.mitgliedInKursAnmelden(mitgliedId, kursId);
     }
+
+    private static void impressumAnzeigen() {
+        System.out.println("\nGYM Cleverfit Siegen");
+        System.out.println("Inhaber: Sergej Wagner, Michael Wagner");
+        System.out.println("Adresse: Freudenberger Str. 488, 57072 Siegen");
+        System.out.println("\nÖffnungszeiten:");
+        System.out.println(" " + OeffnungszeitenCheck.pruefeOeffnungszeiten()); // bereits eingebunden
+        System.out.println("Mo–Fr: 07:00–23:00 | Sa–So: 09:00–20:00 | Feiertags: 09:00–16:00");
+        System.out.println("Email: studio@siegen.clever-fit.com | Tel: +49 (0) 27180918578");
+    }
+
+    private static void mitgliedSuchmenue() {
+        boolean zurueck = false;
+
+        while (!zurueck) {
+            System.out.println("\n🔍 Mitglied suchen / sortieren:");
+            System.out.println("1. Suche nach Mitglieds-ID (binär)");
+            System.out.println("2. Suche nach Name (linear)");
+            System.out.println("3. Mitglieder sortieren + Laufzeit anzeigen");
+            System.out.println("0. Zurück zum Hauptmenü");
+            System.out.print("Auswahl: ");
+            int auswahl = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (auswahl) {
+                case 1 -> mitgliedSuchenNachId();
+                case 2 -> mitgliedSuchenNachName();
+                case 3 -> sortierVergleich();
+                case 0 -> zurueck = true;
+                default -> System.out.println("Ungültige Eingabe.");
+            }
+        }
+    }
+
+    private static void mitgliedSuchenNachId() {
+        System.out.print("Gib die Mitglieds-ID ein: ");
+        int id = scanner.nextInt();
+        scanner.nextLine();
+
+        studio.sortiereMitgliederNachIdInsertionSort(); // vorsortieren
+        Mitglied gefunden = studio.binäreSucheNachId(id);
+
+        if (gefunden != null) {
+            System.out.println("✅ Mitglied gefunden: " + gefunden);
+        } else {
+            System.out.println("❌ Kein Mitglied mit ID " + id + " gefunden.");
+        }
+    }
+
+    private static void mitgliedSuchenNachName() {
+        System.out.print("Gib den Namen des Mitglieds ein: ");
+        String name = scanner.nextLine();
+        Mitglied m = studio.sucheMitgliedNachName(name);
+
+        if (m != null) {
+            System.out.println("✅ Mitglied gefunden: " + m);
+        } else {
+            System.out.println("❌ Kein Mitglied mit Namen \"" + name + "\" gefunden.");
+        }
+    }
+
+    private static void sortierVergleich() {
+        System.out.print("Wähle Sortierverfahren (binaer/linear): ");
+        String methode = scanner.nextLine();
+
+        long dauerNano = studio.sortiereUndMesseZeit(methode);
+        long dauerMillis = dauerNano / 1_000_000;
+
+        System.out.println("⏱️ Sortierung mit \"" + methode + "\" dauerte: " + dauerMillis + " ms");
+        studio.mitgliederAnzeigen();
+    }
+}
+
+class FitnessStudio {
+    private String name;
+    private String adresse;
+    private List<Mitglied> mitglieder = new ArrayList<>();
+    private List<Trainer> trainer = new ArrayList<>();
+    private List<Kurs> kurse = new ArrayList<>();
+    private int mitgliedCounter = 1, trainerCounter = 1, kursCounter = 1;
+
+    public FitnessStudio(String name, String adresse) {
+        this.name = name;
+        this.adresse = adresse;
+    }
+
+    public void mitgliedAnmelden(String name, String geburtsdatum) {
+        Mitglied m = new Mitglied(name, mitgliedCounter++, geburtsdatum);
+        mitglieder.add(m);
+        System.out.println("✅ Mitglied " + name + " wurde erfolgreich erstellt.");
+    }
+
+    public void trainerEintragen(String name, List<String> spezialisierungen) {
+        Trainer t = new Trainer(name, trainerCounter++, spezialisierungen);
+        trainer.add(t);
+        System.out.println("✅ Trainer " + name + " wurde erfolgreich erstellt.");
+    }
+
+    public void kursErstellen(String name, String leiter, String zeit, int maxTeilnehmer) {
+        Kurs k = new Kurs(name, kursCounter++, leiter, zeit, maxTeilnehmer);
+        kurse.add(k);
+        System.out.println("✅ Kurs " + name + " wurde erfolgreich erstellt.");
+    }
+
+    public void mitgliedInKursAnmelden(int mitgliedId, int kursId) {
+        Mitglied m = mitglieder.stream().filter(x -> x.getId() == mitgliedId).findFirst().orElse(null);
+        Kurs k = kurse.stream().filter(x -> x.getId() == kursId).findFirst().orElse(null);
+        if (m == null || k == null) {
+            System.out.println("❌ Mitglied oder Kurs nicht gefunden!");
+            return;
+        }
+        m.fuerKursAnmelden(k);
+    }
+
+    public void mitgliederAnzeigen() {
+        System.out.println("\n👤 Mitgliederliste:");
+        if (mitglieder.isEmpty()) System.out.println("Keine Mitglieder vorhanden.");
+        for (Mitglied m : mitglieder) System.out.println(m);
+    }
+
+    public void trainerAnzeigen() {
+        System.out.println("\n🏋 Trainerliste:");
+        if (trainer.isEmpty()) System.out.println("Keine Trainer vorhanden.");
+        for (Trainer t : trainer) System.out.println(t);
+    }
+
+    public void kurseAnzeigen() {
+        System.out.println("\n📅 Kursliste:");
+        if (kurse.isEmpty()) System.out.println("Keine Kurse vorhanden.");
+        for (Kurs k : kurse) {
+            System.out.println(k);
+            k.teilnehmerAnzeigen();
+        }
+    }
+
+    public void sortiereMitgliederNachIdInsertionSort() {
+        for (int i = 1; i < mitglieder.size(); i++) {
+            Mitglied key = mitglieder.get(i);
+            int j = i - 1;
+            while (j >= 0 && mitglieder.get(j).getId() > key.getId()) {
+                mitglieder.set(j + 1, mitglieder.get(j));
+                j--;
+            }
+            mitglieder.set(j + 1, key);
+        }
+    }
+
+    public void sortiereMitgliederNachIdBubbleSort() {
+        int n = mitglieder.size();
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (mitglieder.get(j).getId() > mitglieder.get(j + 1).getId()) {
+                    Mitglied temp = mitglieder.get(j);
+                    mitglieder.set(j, mitglieder.get(j + 1));
+                    mitglieder.set(j + 1, temp);
+                }
+            }
+        }
+    }
+
+    public long sortiereUndMesseZeit(String methode) {
+        long start = System.nanoTime();
+        switch (methode.toLowerCase()) {
+            case "binear" -> sortiereMitgliederNachIdInsertionSort();
+            case "linear" -> sortiereMitgliederNachIdBubbleSort();
+            default -> System.out.println("❌ Unbekanntes Verfahren.");
+        }
+        return System.nanoTime() - start;
+    }
+
+    public Mitglied binäreSucheNachId(int id) {
+        int links = 0, rechts = mitglieder.size() - 1;
+        while (links <= rechts) {
+            int mitte = links + (rechts - links) / 2;
+            int midId = mitglieder.get(mitte).getId();
+            if (midId == id) return mitglieder.get(mitte);
+            else if (midId < id) links = mitte + 1;
+            else rechts = mitte - 1;
+        }
+        return null;
+    }
+
+    public Mitglied sucheMitgliedNachName(String name) {
+        for (Mitglied m : mitglieder) {
+            if (m.getName().equalsIgnoreCase(name)) return m;
+        }
+        return null;
+    }
+}
+
+abstract class VerwalteteEntitaet {
+    protected String name;
+    protected int id;
+
+    public VerwalteteEntitaet(String name, int id) {
+        this.name = name;
+        this.id = id;
+    }
+
+    public String getName() { return name; }
+    public int getId() { return id; }
 }
 
 class Mitglied extends VerwalteteEntitaet {
     private String geburtsdatum;
-    private List<Kurs> kurse;
+    private List<Kurs> kurse = new ArrayList<>();
 
     public Mitglied(String name, int id, String geburtsdatum) {
         super(name, id);
         this.geburtsdatum = geburtsdatum;
-        this.kurse = new ArrayList<>();
     }
 
     public void fuerKursAnmelden(Kurs kurs) {
@@ -120,7 +308,7 @@ class Mitglied extends VerwalteteEntitaet {
             kurse.add(kurs);
             kurs.teilnehmerHinzufuegen(this);
         } else {
-            System.out.println("Kurs ist voll!");
+            System.out.println("❌ Kurs ist voll!");
         }
     }
 
@@ -138,158 +326,46 @@ class Trainer extends VerwalteteEntitaet {
         this.spezialisierungen = spezialisierungen;
     }
 
-    public List<String> getSpezialisierungen() {
-        return spezialisierungen;
-    }
-
     @Override
     public String toString() {
-        return "Trainer ID: " + getId() + " | Name: " + getName() + " , Spezialisierungen: " + String.join(", ", spezialisierungen);
-    }
-}
-
-abstract class VerwalteteEntitaet {
-    protected String name;
-    protected int id;
-
-    public VerwalteteEntitaet(String name, int id) {
-        this.name = name;
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getId() {
-        return id;
+        return "Trainer ID: " + id + " | Name: " + name + " | Spezialisierungen: " + String.join(", ", spezialisierungen);
     }
 }
 
 class Kurs extends VerwalteteEntitaet {
-    private String leiter;
-    private String zeit;
+    private String leiter, zeit;
     private int maxTeilnehmer;
-    private List<Mitglied> teilnehmer;
+    private List<Mitglied> teilnehmer = new ArrayList<>();
 
     public Kurs(String name, int id, String leiter, String zeit, int maxTeilnehmer) {
         super(name, id);
         this.leiter = leiter;
         this.zeit = zeit;
         this.maxTeilnehmer = maxTeilnehmer;
-        this.teilnehmer = new ArrayList<>();
     }
 
     public boolean hatPlatz() {
         return teilnehmer.size() < maxTeilnehmer;
     }
 
-    public void teilnehmerHinzufuegen(Mitglied mitglied) {
-        if (hatPlatz()) {
-            teilnehmer.add(mitglied);
-            System.out.println(mitglied.getName() + " wurde in den Kurs " + name + " hinzugefügt.");
-        } else {
-            System.out.println("Kurs ist voll! " + mitglied.getName() + " kann nicht teilnehmen!");
-        }
+    public void teilnehmerHinzufuegen(Mitglied m) {
+        teilnehmer.add(m);
+        System.out.println("✅ " + m.getName() + " wurde in den Kurs '" + name + "' eingetragen.");
     }
 
     public void teilnehmerAnzeigen() {
         if (teilnehmer.isEmpty()) {
-            System.out.println("Dieser Kurs hat noch keine Teilnehmer.");
+            System.out.println("Keine Teilnehmer.");
         } else {
-            System.out.println("Teilnehmer des Kurses '" + name + "':");
+            System.out.println("Teilnehmer in '" + name + "':");
             for (Mitglied m : teilnehmer) {
-                System.out.println(m);
+                System.out.println(" - " + m.getName());
             }
         }
     }
 
     @Override
     public String toString() {
-        return "Kurs ID: " + getId() + " | Name: " + getName() + " | Leiter: " + leiter + " | Zeit: " + zeit + " | Max Teilnehmer: " + maxTeilnehmer;
-    }
-}
-
-
-class FitnessStudio {
-    private String name;
-    private String adresse;
-    private List<Mitglied> mitglieder;
-    private List<Trainer> trainer;
-    private List<Kurs> kurse;
-    private int mitgliedCounter = 1;
-    private int trainerCounter = 1;
-    private int kursCounter = 1;
-
-    public FitnessStudio(String name, String adresse) {
-        this.name = name;
-        this.adresse = adresse;
-        this.mitglieder = new ArrayList<>();
-        this.trainer = new ArrayList<>();
-        this.kurse = new ArrayList<>();
-    }
-
-    public void mitgliedAnmelden(String name, String geburtsdatum) {
-        Mitglied m = new Mitglied(name, mitgliedCounter++, geburtsdatum);
-        mitglieder.add(m);
-        System.out.println("Mitglied " + name + " wurde erfolgreich erstellt.");
-    }
-
-    public void trainerEintragen(String name, List<String> spezialisierungen) {
-        Trainer t = new Trainer(name, trainerCounter++, spezialisierungen);
-        trainer.add(t);
-        System.out.println("Trainer " + name + " wurde erfolgreich erstellt.");
-    }
-
-    public void kursErstellen(String name, String leiter, String zeit, int maxTeilnehmer) {
-        Kurs k = new Kurs(name, kursCounter++, leiter, zeit, maxTeilnehmer);
-        kurse.add(k);
-        System.out.println("Kurs " + name + " wurde erfolgreich erstellt.");
-    }
-
-    public void mitgliedInKursAnmelden(int mitgliedId, int kursId) {
-        Mitglied mitglied = mitglieder.stream().filter(m -> m.getId() == mitgliedId).findFirst().orElse(null);
-        Kurs kurs = kurse.stream().filter(k -> k.getId() == kursId).findFirst().orElse(null);
-
-        if (mitglied == null || kurs == null) {
-            System.out.println("Mitglied oder Kurs nicht gefunden!");
-            return;
-        }
-
-        mitglied.fuerKursAnmelden(kurs);
-    }
-
-    public void mitgliederAnzeigen() {
-        System.out.println("\n👤 Mitglieder-Liste:");
-        if (mitglieder.isEmpty()) {
-            System.out.println("Keine Mitglieder vorhanden.");
-            return;
-        }
-        for (Mitglied m : mitglieder) {
-            System.out.println(m);
-        }
-    }
-
-    public void trainerAnzeigen() {
-        System.out.println("\n🏋 Trainer-Liste:");
-        if (trainer.isEmpty()) {
-            System.out.println("Keine Trainer vorhanden.");
-            return;
-        }
-        for (Trainer t : trainer) {
-            System.out.println(t);
-        }
-    }
-
-    public void kurseAnzeigen() {
-        System.out.println("\n📅 Kurs-Liste:");
-        if (kurse.isEmpty()) {
-            System.out.println("Keine Kurse vorhanden.");
-            return;
-        }
-        for (Kurs k : kurse) {
-            System.out.println(k);
-            k.teilnehmerAnzeigen();
-        }
+        return "Kurs ID: " + id + " | Name: " + name + " | Leiter: " + leiter + " | Zeit: " + zeit + " | Max: " + maxTeilnehmer;
     }
 }
